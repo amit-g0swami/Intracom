@@ -1,0 +1,142 @@
+/**
+ * @file tokens.css
+ * @description Master CSS variables for the Intracom UI component library.
+ * It provides a comprehensive, scalable design system foundation.
+ */
+
+:root {
+  /* ==========================================================================
+     Colors - Foundation (Light Mode Default)
+     ========================================================================== */
+
+  /* Neutral / Base */
+  --sp-color-white: #ffffff;
+  --sp-color-black: #09090b;
+  --sp-color-transparent: transparent;
+
+  /* Primary Brand */
+  --sp-color-primary-50: #eff6ff;
+  --sp-color-primary-100: #dbeafe;
+  --sp-color-primary-200: #bfdbfe;
+  --sp-color-primary-300: #93c5fd;
+  --sp-color-primary-400: #60a5fa;
+  --sp-color-primary-500: #3b82f6; /* Base */
+  --sp-color-primary-600: #2563eb;
+  --sp-color-primary-700: #1d4ed8;
+  --sp-color-primary-800: #1e40af;
+  --sp-color-primary-900: #1e3a8a;
+
+  /* Semantic - Success */
+  --sp-color-success-50: #f0fdf4;
+  --sp-color-success-500: #22c55e;
+  --sp-color-success-700: #15803d;
+
+  /* Semantic - Warning */
+  --sp-color-warning-50: #fefce8;
+  --sp-color-warning-500: #eab308;
+  --sp-color-warning-700: #a16207;
+
+  /* Semantic - Error */
+  --sp-color-error-50: #fef2f2;
+  --sp-color-error-500: #ef4444;
+  --sp-color-error-700: #b91c1c;
+
+  /* Grey scale for text and borders */
+  --sp-color-grey-50: #fafafa;
+  --sp-color-grey-100: #f4f4f5;
+  --sp-color-grey-200: #e4e4e7;
+  --sp-color-grey-300: #d4d4d8;
+  --sp-color-grey-400: #a1a1aa;
+  --sp-color-grey-500: #71717a;
+  --sp-color-grey-600: #52525b;
+  --sp-color-grey-700: #3f3f46;
+  --sp-color-grey-800: #27272a;
+  --sp-color-grey-900: #18181b;
+
+  /* ==========================================================================
+     Theme Mappings (Applying semantic meaning to colors)
+     ========================================================================== */
+  
+  --sp-bg-base: var(--sp-color-white);
+  --sp-bg-surface: var(--sp-color-grey-50);
+  --sp-bg-interactive: var(--sp-color-primary-500);
+  --sp-bg-interactive-hover: var(--sp-color-primary-600);
+
+  --sp-text-base: var(--sp-color-grey-900);
+  --sp-text-muted: var(--sp-color-grey-500);
+  --sp-text-inverse: var(--sp-color-white);
+
+  --sp-border-base: var(--sp-color-grey-200);
+  --sp-border-focus: var(--sp-color-primary-500);
+
+  /* ==========================================================================
+     Typography
+     ========================================================================== */
+  --sp-font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  
+  --sp-text-xs: 0.75rem;     /* 12px */
+  --sp-text-sm: 0.875rem;    /* 14px */
+  --sp-text-base-size: 1rem;      /* 16px */
+  --sp-text-lg: 1.125rem;    /* 18px */
+  --sp-text-xl: 1.25rem;     /* 20px */
+  
+  --sp-font-normal: 400;
+  --sp-font-medium: 500;
+  --sp-font-semibold: 600;
+  --sp-font-bold: 700;
+
+  /* ==========================================================================
+     Spacing & Layout
+     ========================================================================== */
+  --sp-space-1: 0.25rem;  /* 4px */
+  --sp-space-2: 0.5rem;   /* 8px */
+  --sp-space-3: 0.75rem;  /* 12px */
+  --sp-space-4: 1rem;     /* 16px */
+  --sp-space-5: 1.25rem;  /* 20px */
+  --sp-space-6: 1.5rem;   /* 24px */
+  --sp-space-8: 2rem;     /* 32px */
+
+  /* ==========================================================================
+     Radii (Border Radius)
+     ========================================================================== */
+  --sp-radius-sm: 0.125rem; /* 2px */
+  --sp-radius-md: 0.375rem; /* 6px */
+  --sp-radius-lg: 0.5rem;   /* 8px */
+  --sp-radius-full: 9999px;
+
+  /* ==========================================================================
+     Shadows
+     ========================================================================== */
+  --sp-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --sp-shadow-base: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --sp-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --sp-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  
+  /* Focus Rings */
+  --sp-ring-offset-width: 2px;
+  --sp-ring-offset-color: var(--sp-bg-base);
+  --sp-ring-color: var(--sp-color-primary-400);
+  --sp-ring-width: 2px;
+}
+
+/* ==========================================================================
+   Dark Mode Definitions
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --sp-bg-base: var(--sp-color-grey-900);
+    --sp-bg-surface: var(--sp-color-grey-800);
+    
+    --sp-text-base: var(--sp-color-grey-50);
+    --sp-text-muted: var(--sp-color-grey-400);
+    
+    --sp-border-base: var(--sp-color-grey-700);
+    
+    /* Modify primary slightly for dark mode contrast */
+    --sp-bg-interactive: var(--sp-color-primary-600);
+    --sp-bg-interactive-hover: var(--sp-color-primary-500);
+
+    --sp-ring-offset-color: var(--sp-bg-base);
+  }
+}
