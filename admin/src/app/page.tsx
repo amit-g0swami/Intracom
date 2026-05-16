@@ -7,9 +7,11 @@ import { ThreadMap, MessagePayload } from '@/types/chat.types';
 import { SidebarNav } from '@/components/layout/SidebarNav';
 import { InboxList } from '@/components/chat/InboxList';
 import { ChatWindow } from '@/components/chat/ChatWindow';
+import { StatsView } from '@/components/stats/StatsView';
 
 export default function Dashboard() {
   const { socket, isConnected, messages } = useSocket();
+  const [activeTab, setActiveTab] = useState('chat');
   
   // Group messages by conversation ID
   const threads: ThreadMap = messages.reduce((acc: ThreadMap, msg: MessagePayload) => {
@@ -36,20 +38,27 @@ export default function Dashboard() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-100">
-      <SidebarNav />
-      <InboxList 
-        isConnected={isConnected}
-        threads={threads}
-        activeConversationIds={activeConversationIds}
-        activeThreadId={activeThreadId}
-        setActiveThreadId={setActiveThreadId}
-      />
-      <ChatWindow 
-        activeThreadId={activeThreadId}
-        activeMessages={activeMessages}
-        isConnected={isConnected}
-        handleReply={handleReply}
-      />
+      <SidebarNav activeTab={activeTab} onTabChange={setActiveTab} />
+      
+      {activeTab === 'chat' ? (
+        <>
+          <InboxList 
+            isConnected={isConnected}
+            threads={threads}
+            activeConversationIds={activeConversationIds}
+            activeThreadId={activeThreadId}
+            setActiveThreadId={setActiveThreadId}
+          />
+          <ChatWindow 
+            activeThreadId={activeThreadId}
+            activeMessages={activeMessages}
+            isConnected={isConnected}
+            handleReply={handleReply}
+          />
+        </>
+      ) : (
+        <StatsView />
+      )}
     </div>
   );
 }

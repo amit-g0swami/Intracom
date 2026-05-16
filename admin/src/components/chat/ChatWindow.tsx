@@ -1,6 +1,7 @@
 import { MessagePayload } from '@/types/chat.types';
 import { ChatInput } from './ChatInput';
 import { MessageSquare } from 'lucide-react';
+import { List, ListItem } from 'intracom-ui';
 
 interface ChatWindowProps {
   activeThreadId: string | null;
@@ -25,18 +26,21 @@ export function ChatWindow({ activeThreadId, activeMessages, isConnected, handle
          <h3 className="font-semibold text-gray-800">Thread: {activeThreadId}</h3>
       </header>
 
-      <div className="flex-1 p-6 overflow-y-auto flex flex-col gap-4 bg-gray-50">
+      <List className="flex-1 p-6 overflow-y-auto gap-4 bg-gray-50">
          {activeMessages.map((msg: MessagePayload, i: number) => {
             const isAdmin = msg.isAdmin;
             return (
-              <div key={i} className={`flex w-full ${isAdmin ? 'justify-end' : 'justify-start'}`}>
+              <ListItem 
+                 key={i} 
+                 className={`p-0 bg-transparent hover:bg-transparent dark:hover:bg-transparent ${isAdmin ? 'justify-end' : 'justify-start'}`}
+              >
                  <div className={`max-w-[70%] p-3 rounded-2xl text-sm ${isAdmin ? 'bg-blue-600 text-white rounded-br-sm shadow-md' : 'bg-white border text-gray-800 rounded-bl-sm shadow-sm'}`}>
                     {msg.text}
                  </div>
-              </div>
+              </ListItem>
             )
          })}
-      </div>
+      </List>
 
       <ChatInput isConnected={isConnected} onSubmit={handleReply} />
     </main>

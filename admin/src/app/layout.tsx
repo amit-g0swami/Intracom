@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { SocketProvider } from '@/components/SocketProvider';
+import { AuthProvider } from '@/contexts/AuthContext';
 
 export const metadata: Metadata = {
   title: 'Intracom Admin Dashboard',
@@ -15,9 +16,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased bg-gray-50 text-gray-900">
-        <SocketProvider>
-          {children}
-        </SocketProvider>
+        <AuthProvider>
+          <SocketProvider>
+            {children}
+          </SocketProvider>
+        </AuthProvider>
       </body>
     </html>
   );

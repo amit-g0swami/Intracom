@@ -21,7 +21,8 @@ export const useSocket = () => useContext(SocketContext);
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const [socket] = useState<Socket | null>(() => {
     if (typeof window !== 'undefined') {
-      return io('http://localhost:3000', {
+      const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3000';
+      return io(socketUrl, {
         query: { isAdmin: 'true' },
         autoConnect: false,
       });
