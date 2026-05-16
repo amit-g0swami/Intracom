@@ -2,11 +2,12 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
+import { MessagePayload } from '@/types/chat.types';
 
 interface SocketContextType {
   socket: Socket | null;
   isConnected: boolean;
-  messages: any[];
+  messages: MessagePayload[];
 }
 
 const SocketContext = createContext<SocketContextType>({
@@ -18,35 +19,41 @@ const SocketContext = createContext<SocketContextType>({
 export const useSocket = () => useContext(SocketContext);
 
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
-  const [socket, setSocket] = useState<Socket | null>(null);
+  const [socket] = useState<Socket | null>(() => {
+    if (typeof window !== 'undefined') {
+      return io('http://localhost:3000', {
+        query: { isAdmin: 'true' },
+        autoConnect: false,
+      });
+    }
+    return null;
+  });
+  
   const [isConnected, setIsConnected] = useState(false);
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<MessagePayload[]>([]);
 
   useEffect(() => {
-    // Admin connects with isAdmin=true
-    const socketInstance = io('http://localhost:3000', {
-      query: { isAdmin: 'true' },
-    });
+    if (!socket) return;
 
-    socketInstance.on('connect', () => {
-      setIsConnected(true);
-    });
+    socket.connect();
 
-    socketInstance.on('disconnect', () => {
-      setIsConnected(false);
-    });
-
-    socketInstance.on('admin_new_message', (payload: any) => {
-      // payload matches SendMessageDto coming from ChatGateway
+    const onConnect = () => setIsConnected(true);
+    const onDisconnect = () => setIsConnected(false);
+    const onMessage = (payload: MessagePayload) => {
       setMessages((prev) => [...prev, payload]);
-    });
+    };
 
-    setSocket(socketInstance);
+    socket.on('connect', onConnect);
+    socket.on('disconnect', onDisconnect);
+    socket.on('admin_new_message', onMessage);
 
     return () => {
-      socketInstance.disconnect();
+      socket.off('connect', onConnect);
+      socket.off('disconnect', onDisconnect);
+      socket.off('admin_new_message', onMessage);
+      socket.disconnect();
     };
-  }, []);
+  }, [socket]);
 
   return (
     <SocketContext.Provider value={{ socket, isConnected, messages }}>
