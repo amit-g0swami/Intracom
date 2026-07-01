@@ -1,4 +1,4 @@
-import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsObject, IsOptional, IsString } from 'class-validator';
 import type { SendMessagePayload } from '@intracom/contracts';
 
 export class SendMessageDto implements SendMessagePayload {
@@ -20,4 +20,12 @@ export class SendMessageDto implements SendMessagePayload {
   @IsOptional()
   @IsString()
   appId?: string;
+
+  @IsOptional()
+  @IsString()
+  visitorId?: string;
+
+  @IsOptional()
+  @IsObject()
+  visitorAttributes?: Record<string, unknown>;
 }

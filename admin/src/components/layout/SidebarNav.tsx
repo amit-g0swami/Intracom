@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { MessageSquare, BarChart3, Settings, LogOut } from 'lucide-react';
+import { MessageSquare, BarChart3, Settings, LogOut, Users } from 'lucide-react';
 import { Button, Avatar, AvatarFallback, Sidebar, SidebarContent, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from 'intracom-ui';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -26,7 +26,13 @@ export function SidebarNav({ activeTab }: { activeTab: string }) {
             label="Conversations" 
             isActive={activeTab === 'chat'} 
           />
-          <NavIcon 
+          <NavIcon
+            href="/users"
+            icon={<Users size={22} />}
+            label="Visitors"
+            isActive={activeTab === 'users'}
+          />
+          <NavIcon
             href="/stats" 
             icon={<BarChart3 size={22} />} 
             label="Analytics" 

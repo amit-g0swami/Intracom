@@ -4,6 +4,7 @@ import { ServiceUnavailableException } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { MessageRepository } from '../repositories/message.repository';
 import { ConversationRepository } from '../repositories/conversation.repository';
+import { VisitorsService } from '../../visitors/visitors.service';
 
 describe('ChatService', () => {
   let service: ChatService;
@@ -26,6 +27,11 @@ describe('ChatService', () => {
     findById: jest.fn(),
     updateStatus: jest.fn(),
     ensureExists: jest.fn(),
+    linkVisitor: jest.fn(),
+  };
+
+  const visitorsServiceMock = {
+    trackFromMessage: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -42,6 +48,10 @@ describe('ChatService', () => {
         {
           provide: ConversationRepository,
           useValue: conversationRepositoryMock,
+        },
+        {
+          provide: VisitorsService,
+          useValue: visitorsServiceMock,
         },
         {
           provide: EventEmitter2,
@@ -96,6 +106,7 @@ describe('ChatService', () => {
         ChatService,
         { provide: MessageRepository, useValue: messageRepositoryMock },
         { provide: ConversationRepository, useValue: conversationRepositoryMock },
+        { provide: VisitorsService, useValue: visitorsServiceMock },
         { provide: EventEmitter2, useValue: { emit: jest.fn() } },
       ],
     }).compile();

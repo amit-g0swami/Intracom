@@ -44,4 +44,6 @@ export interface SendMessagePayload {
   text: string;
   isAdmin: boolean;
   appId?: string;
+  visitorId?: string;
+  visitorAttributes?: Record<string, unknown>;
 }

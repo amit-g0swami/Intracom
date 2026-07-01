@@ -6,6 +6,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { ChatModule } from './chat/chat.module';
 import { AuthModule } from './auth/auth.module';
 import { StatsModule } from './stats/stats.module';
+import { VisitorsModule } from './visitors/visitors.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { StatsModule } from './stats/stats.module';
     AuthModule,
     ChatModule,
     StatsModule,
+    VisitorsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

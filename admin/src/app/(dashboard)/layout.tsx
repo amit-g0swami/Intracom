@@ -11,11 +11,13 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const activeTab = pathname.startsWith('/chat')
     ? 'chat'
-    : pathname.startsWith('/stats')
-      ? 'stats'
-      : pathname.startsWith('/settings')
-        ? 'settings'
-        : 'chat';
+    : pathname.startsWith('/users')
+      ? 'users'
+      : pathname.startsWith('/stats')
+        ? 'stats'
+        : pathname.startsWith('/settings')
+          ? 'settings'
+          : 'chat';
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">

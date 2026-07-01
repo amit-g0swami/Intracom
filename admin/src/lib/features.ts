@@ -3,6 +3,7 @@ export interface FeatureFlags {
   socketAuth: boolean;
   chatApi: boolean;
   statsApi: boolean;
+  visitorsApi: boolean;
   apiUrl: string;
   socketUrl: string;
 }
@@ -20,6 +21,7 @@ export const features: FeatureFlags = {
   socketAuth: parseBoolean(process.env.NEXT_PUBLIC_FEATURE_SOCKET_AUTH, false),
   chatApi: parseBoolean(process.env.NEXT_PUBLIC_FEATURE_CHAT_API, true),
   statsApi: parseBoolean(process.env.NEXT_PUBLIC_FEATURE_STATS_API, true),
+  visitorsApi: parseBoolean(process.env.NEXT_PUBLIC_FEATURE_VISITORS_API, true),
   apiUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
   socketUrl: process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3000',
 };

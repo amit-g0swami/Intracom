@@ -10,5 +10,6 @@ Start here. Each guide covers one area of the platform.
 | [AUTHENTICATION.md](./AUTHENTICATION.md) | Login, JWT, feature flags |
 | [CHAT.md](./CHAT.md) | Inbox API, sockets, persistence |
 | [ANALYTICS.md](./ANALYTICS.md) | Stats API and admin dashboard |
+| [VISITORS.md](./VISITORS.md) | Visitor profiles (JSONB user list) |
 
 Roadmap: [../PROJECT_ROADMAP.md](../PROJECT_ROADMAP.md)

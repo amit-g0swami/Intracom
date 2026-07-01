@@ -40,4 +40,5 @@ Admin: [http://localhost:3001](http://localhost:3001) · API: [http://localhost:
 - [Authentication](./docs/AUTHENTICATION.md)
 - [Chat & inbox](./docs/CHAT.md)
 - [Analytics](./docs/ANALYTICS.md)
+- [Visitors / user profiles](./docs/VISITORS.md)
 - [Roadmap](./PROJECT_ROADMAP.md)

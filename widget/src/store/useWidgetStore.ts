@@ -16,7 +16,8 @@ interface WidgetState {
   messages: Message[]
   isConnected: boolean
   conversationId: string | null
-  
+  visitorId: string | null
+
   toggleWidget: () => void
   setUnreadCount: (count: number) => void
   addMessage: (msg: Message) => void
@@ -35,12 +36,22 @@ function socketPayloadToMessage(payload: SocketMessagePayload): Message {
   }
 }
 
+function getOrCreateStorageKey(key: string): string {
+  let value = localStorage.getItem(key)
+  if (!value) {
+    value = crypto.randomUUID()
+    localStorage.setItem(key, value)
+  }
+  return value
+}
+
 export const useWidgetStore = create<WidgetState>((set, get) => ({
   isOpen: false,
   unreadCount: 0,
   messages: [],
   isConnected: false,
   conversationId: null,
+  visitorId: null,
 
   toggleWidget: () => set((state) => ({ isOpen: !state.isOpen })),
 
@@ -48,9 +59,9 @@ export const useWidgetStore = create<WidgetState>((set, get) => ({
 
   addMessage: (msg) => set((state) => {
     if (state.messages.find(m => m.id === msg.id)) return state;
-    
+
     const newUnreadCount = !state.isOpen && msg.isAdmin ? state.unreadCount + 1 : state.unreadCount;
-    return { 
+    return {
       messages: [...state.messages, msg],
       unreadCount: newUnreadCount
     };
@@ -61,16 +72,13 @@ export const useWidgetStore = create<WidgetState>((set, get) => ({
   initChat: (url = 'http://localhost:3000') => {
     const state = get();
     if (state.isConnected) return;
-    
-    let savedId = localStorage.getItem('intracom_conversation_id');
-    if (!savedId) {
-        savedId = crypto.randomUUID();
-        localStorage.setItem('intracom_conversation_id', savedId);
-    }
-    
-    set({ conversationId: savedId });
 
-    const socket = initSocket(url, savedId);
+    const visitorId = getOrCreateStorageKey('intracom_visitor_id');
+    const conversationId = getOrCreateStorageKey('intracom_conversation_id');
+
+    set({ conversationId, visitorId });
+
+    const socket = initSocket(url, conversationId);
 
     socket.on('connect', () => {
       set({ isConnected: true });
@@ -86,18 +94,24 @@ export const useWidgetStore = create<WidgetState>((set, get) => ({
   },
 
   sendMessage: (text: string) => {
-    const { conversationId } = get();
+    const { conversationId, visitorId } = get();
     const socket = getSocket();
-    
-    if (!socket || !conversationId) return;
+
+    if (!socket || !conversationId || !visitorId) return;
 
     socket.emit(SOCKET_EVENTS.SEND_MESSAGE, {
       conversationId,
+      visitorId,
       senderId: 'visitor',
       text,
-      isAdmin: false
+      isAdmin: false,
+      visitorAttributes: {
+        userAgent: navigator.userAgent,
+        language: navigator.language,
+        pageUrl: window.location.href,
+      },
     });
-    
+
     get().addMessage({
       id: crypto.randomUUID(),
       text,

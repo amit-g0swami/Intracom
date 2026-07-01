@@ -50,4 +50,11 @@ export class ConversationRepository {
       data: { status },
     });
   }
+
+  async linkVisitor(conversationId: string, visitorId: string) {
+    return this.prisma.conversation.update({
+      where: { id: conversationId },
+      data: { visitorId },
+    });
+  }
 }

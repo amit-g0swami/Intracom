@@ -21,6 +21,7 @@ export function SettingsView() {
     { label: 'Socket JWT', enabled: features.socketAuth },
     { label: 'Chat REST API', enabled: features.chatApi },
     { label: 'Stats API', enabled: features.statsApi },
+    { label: 'Visitors API', enabled: features.visitorsApi },
   ];
 
   return (

@@ -7,6 +7,7 @@ export interface FeatureFlags {
   chatApiEnabled: boolean;
   chatPersistenceEnabled: boolean;
   statsApiEnabled: boolean;
+  visitorsApiEnabled: boolean;
   defaultAppId: string;
   jwtSecret: string;
   jwtExpiresIn: string;
@@ -39,6 +40,7 @@ export function loadFeatureFlags(): FeatureFlags {
     chatApiEnabled: parseBoolean(process.env.FEATURE_CHAT_API, true),
     chatPersistenceEnabled: parseBoolean(process.env.FEATURE_CHAT_PERSISTENCE, true),
     statsApiEnabled: parseBoolean(process.env.FEATURE_STATS_API, true),
+    visitorsApiEnabled: parseBoolean(process.env.FEATURE_VISITORS_API, true),
     defaultAppId: process.env.DEFAULT_APP_ID || 'default',
     jwtSecret: process.env.AUTH_JWT_SECRET || 'intracom-dev-secret-change-in-production',
     jwtExpiresIn: process.env.AUTH_JWT_EXPIRES_IN || '7d',

@@ -30,7 +30,7 @@ Step-by-step path from MVP to enterprise scale. **Completed items are checked.**
 - [x] Inbox search + resolve conversation
 - [x] Real analytics (`StatsView` → `/stats/dashboard`)
 - [x] Settings page (account + env flags)
-- [ ] User list / visitor profiles (roadmap `User` model with JSONB)
+- [x] Visitor profiles + user list (`Visitor` model, JSONB `attributes`, `/users`)
 
 ### Caching & jobs
 - [x] Redis Socket.IO adapter

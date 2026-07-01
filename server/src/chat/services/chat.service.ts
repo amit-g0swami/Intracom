@@ -18,6 +18,7 @@ import {
 import { MessageSentEvent } from '../events/message-sent.event';
 import { ConversationRepository } from '../repositories/conversation.repository';
 import { MessageRepository } from '../repositories/message.repository';
+import { VisitorsService } from '../../visitors/visitors.service';
 
 @Injectable()
 export class ChatService {
@@ -27,6 +28,7 @@ export class ChatService {
   constructor(
     private readonly messageRepository: MessageRepository,
     private readonly conversationRepository: ConversationRepository,
+    private readonly visitorsService: VisitorsService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
@@ -160,6 +162,8 @@ export class ChatService {
 
     const savedMessage = await this.messageRepository.save(dto);
 
+    await this.attachVisitor(dto);
+
     this.logger.log(`Message saved in conversation ${dto.conversationId}`);
 
     this.eventEmitter.emit(
@@ -175,5 +179,23 @@ export class ChatService {
     );
 
     return savedMessage;
+  }
+
+  private async attachVisitor(dto: SendMessageDto): Promise<void> {
+    const appId = dto.appId ?? this.features.defaultAppId;
+
+    await this.visitorsService.trackFromMessage({
+      visitorId: dto.visitorId,
+      appId,
+      conversationId: dto.conversationId,
+      visitorAttributes: dto.visitorAttributes,
+    });
+
+    if (dto.visitorId) {
+      await this.conversationRepository.linkVisitor(
+        dto.conversationId,
+        dto.visitorId,
+      );
+    }
   }
 }

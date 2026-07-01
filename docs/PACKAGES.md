@@ -14,6 +14,7 @@
 | `socket` | `SOCKET_EVENTS`, `SocketMessagePayload` |
 | `events` | `DOMAIN_EVENTS`, `MessageSentEventPayload` |
 | `stats` | `AnalyticsDashboard`, `AnalyticsOverview` |
+| `visitor` | `VisitorSummary`, `VisitorProfile`, `UpdateVisitorPayload` |
 
 ### Local consumption (monorepo)
 

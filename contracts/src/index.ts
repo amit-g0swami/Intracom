@@ -32,3 +32,12 @@ export type {
 
 export type { SocketEventName, SocketMessagePayload } from './socket';
 export { SOCKET_EVENTS } from './socket';
+
+export type {
+  UpdateVisitorPayload,
+  VisitorAttributes,
+  VisitorConversationRef,
+  VisitorProfile,
+  VisitorSummary,
+  VisitorsApiStatus,
+} from './visitor';
