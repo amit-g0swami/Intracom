@@ -10,10 +10,10 @@ export function SidebarNav({ activeTab }: { activeTab: string }) {
 
   return (
     <TooltipProvider delayDuration={0}>
-      <Sidebar className="w-[72px] flex !lg:w-[72px] !xl:w-[72px] border-r flex-col items-center py-6 gap-8 shrink-0 bg-white shadow-[1px_0_0_0_rgba(0,0,0,0.05)]">
+      <Sidebar className="w-[72px] flex !lg:w-[72px] !xl:w-[72px] border-r flex-col items-center py-6 gap-8 shrink-0 bg-[var(--sp-bg-base)] shadow-[1px_0_0_0_rgba(0,0,0,0.05)]">
         <Link href="/chat">
-          <Avatar className="w-10 h-10 cursor-pointer hover:scale-105 transition-transform duration-200 ring-2 ring-transparent hover:ring-blue-100">
-            <AvatarFallback className="bg-blue-600 text-white font-bold text-sm tracking-tighter">
+          <Avatar className="h-10 w-10 cursor-pointer ring-2 ring-transparent transition-transform duration-200 hover:scale-105 hover:ring-[var(--sp-color-primary-100)]">
+            <AvatarFallback className="bg-[var(--sp-color-primary-600)] text-sm font-bold tracking-tighter text-[var(--sp-text-inverse)]">
               IC
             </AvatarFallback>
           </Avatar>
@@ -32,11 +32,11 @@ export function SidebarNav({ activeTab }: { activeTab: string }) {
             label="Analytics" 
             isActive={activeTab === 'stats'} 
           />
-          <NavIcon 
-            href="/settings" 
-            icon={<Settings size={22} />} 
-            label="Settings" 
-            isActive={false} 
+          <NavIcon
+            href="/settings"
+            icon={<Settings size={22} />}
+            label="Settings"
+            isActive={activeTab === 'settings'}
           />
         </SidebarContent>
 
@@ -47,7 +47,7 @@ export function SidebarNav({ activeTab }: { activeTab: string }) {
                 variant="ghost" 
                 size="icon" 
                 onClick={logout}
-                className="w-12 h-12 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200"
+                className="h-12 w-12 rounded-xl text-[var(--sp-text-muted)] transition-all duration-200 hover:bg-[var(--sp-color-primary-50)] hover:text-[var(--sp-color-primary-600)]"
               >
                 <LogOut size={22} />
               </Button>
@@ -68,10 +68,10 @@ function NavIcon({ href, icon, label, isActive }: { href: string, icon: React.Re
           <Button 
             variant="ghost" 
             size="icon" 
-            className={`w-12 h-12 rounded-xl transition-all duration-200 ${
-              isActive 
-                ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 hover:bg-blue-700 hover:text-white' 
-                : 'text-gray-400 hover:text-blue-600 hover:bg-blue-50'
+            className={`h-12 w-12 rounded-xl transition-all duration-200 ${
+              isActive
+                ? 'bg-[var(--sp-bg-interactive)] text-[var(--sp-text-inverse)] shadow-lg shadow-[var(--sp-color-primary-200)] hover:bg-[var(--sp-color-primary-700)] hover:text-[var(--sp-text-inverse)]'
+                : 'text-[var(--sp-text-muted)] hover:bg-[var(--sp-color-primary-50)] hover:text-[var(--sp-color-primary-600)]'
             }`}
           >
             {icon}

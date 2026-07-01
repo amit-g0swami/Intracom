@@ -4,11 +4,13 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "prebuild": "npm run build --prefix ../contracts",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@intracom/contracts": "file:../contracts",
     "preact": "^10.29.0",
     "socket.io-client": "^4.8.3",
     "zustand": "^5.0.12"

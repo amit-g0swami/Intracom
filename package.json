@@ -1,0 +1,22 @@
+{
+  "name": "intracom",
+  "private": true,
+  "workspaces": [
+    "contracts",
+    "frontend-library",
+    "server",
+    "admin",
+    "widget"
+  ],
+  "scripts": {
+    "build:contracts": "npm run build --workspace @intracom/contracts",
+    "build:server": "npm run build --workspace server",
+    "build:admin": "npm run build --workspace admin",
+    "build:widget": "npm run build --workspace widget",
+    "build:ui": "npm run build --workspace intracom-ui",
+    "dev:server": "npm run start:dev --workspace server",
+    "dev:admin": "npm run dev --workspace admin",
+    "dev:widget": "npm run dev --workspace widget",
+    "test:server": "npm test --workspace server"
+  }
+}

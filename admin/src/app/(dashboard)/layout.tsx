@@ -9,7 +9,13 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const activeTab = pathname.startsWith('/chat') ? 'chat' : pathname.startsWith('/stats') ? 'stats' : 'chat';
+  const activeTab = pathname.startsWith('/chat')
+    ? 'chat'
+    : pathname.startsWith('/stats')
+      ? 'stats'
+      : pathname.startsWith('/settings')
+        ? 'settings'
+        : 'chat';
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">

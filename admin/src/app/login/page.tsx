@@ -1,106 +1,165 @@
 "use client";
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button, Input, Label, Typography, Card, CardHeader, CardContent, CardFooter } from 'intracom-ui';
+import {
+  Button,
+  Input,
+  Label,
+  Typography,
+  Card,
+  CardHeader,
+  CardContent,
+  CardFooter,
+  FormField,
+  PasswordInput,
+  Spinner,
+  Alert,
+  AlertTitle,
+  AlertDescription,
+} from 'intracom-ui';
 import { MessageSquare, ShieldCheck, Globe, Zap } from 'lucide-react';
-import Cookies from 'js-cookie';
+import { useAuth } from '@/contexts/AuthContext';
+import { loginWithApi } from '@/lib/auth-api';
+import { features } from '@/lib/features';
+
+const inputClassName =
+  'h-12 rounded-xl border-white/10 bg-white/5 text-white placeholder:text-[var(--sp-color-grey-600)] focus:border-[var(--sp-border-focus)] focus:ring-[var(--sp-ring-color)]';
+
+const labelClassName =
+  'text-xs font-bold uppercase tracking-wider text-[var(--sp-color-grey-300)]';
 
 export default function LoginPage() {
-  const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    // Mock login for now
-    setTimeout(() => {
-      Cookies.set('token', 'mock_jwt_token_123', { expires: 7 });
-      router.push('/chat');
-      router.refresh();
-    }, 1200);
+    setError(null);
+
+    try {
+      const response = await loginWithApi(email, password);
+      login(response.accessToken, response.user);
+    } catch {
+      setError('Invalid email or password. Check your credentials and try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen w-full flex bg-[#09090b] relative overflow-hidden">
-      {/* Decorative Background Elements */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/20 blur-[120px] rounded-full"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-600/20 blur-[120px] rounded-full"></div>
-      
-      <div className="flex-1 flex flex-col justify-center items-center p-6 z-10">
+    <div className="relative flex min-h-screen w-full overflow-hidden bg-[var(--sp-color-black)]">
+      <div className="absolute left-[-10%] top-[-10%] h-[40%] w-[40%] rounded-full bg-[var(--sp-color-primary-600)]/20 blur-[120px]" />
+      <div className="absolute bottom-[-10%] right-[-10%] h-[40%] w-[40%] rounded-full bg-[var(--sp-color-primary-700)]/20 blur-[120px]" />
+
+      <div className="z-10 flex flex-1 flex-col items-center justify-center p-6">
         <div className="w-full max-w-[440px] space-y-8">
-          <div className="text-center space-y-4">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-xl shadow-blue-500/20 mb-2">
-               <MessageSquare className="text-white" size={32} />
+          <div className="space-y-4 text-center">
+            <div className="mb-2 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--sp-color-primary-500)] to-[var(--sp-color-primary-700)] shadow-xl shadow-[var(--sp-color-primary-500)]/20">
+              <MessageSquare className="text-white" size={32} />
             </div>
-            <Typography variant="h1" className="text-white text-3xl font-extrabold tracking-tight border-0 m-0">
+            <Typography variant="h1" className="m-0 border-0 text-3xl font-extrabold tracking-tight text-white">
               Intracom Admin
             </Typography>
-            <Typography className="text-gray-400 text-base">
+            <Typography className="text-base text-[var(--sp-text-muted)]">
               The command center for your customer relationships
             </Typography>
           </div>
 
-          <Card className="border-white/10 bg-white/5 backdrop-blur-2xl shadow-2xl rounded-3xl overflow-hidden p-2">
-            <CardHeader className="pt-8 px-6 pb-2">
-              <Typography variant="h4" className="text-white font-bold tracking-tight border-0 m-0">Sign In</Typography>
-              <Typography className="text-gray-400 text-sm">Enter your credentials to access the dashboard</Typography>
+          {features.mockAuth && (
+            <Alert variant="warning">
+              <AlertTitle>Mock auth enabled</AlertTitle>
+              <AlertDescription>
+                Login uses local mock credentials. Set NEXT_PUBLIC_FEATURE_MOCK_AUTH=false to use the API.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          <Card className="overflow-hidden rounded-3xl border-white/10 bg-white/5 p-2 shadow-2xl backdrop-blur-2xl">
+            <CardHeader className="px-6 pb-2 pt-8">
+              <Typography variant="h4" className="m-0 border-0 font-bold tracking-tight text-white">Sign In</Typography>
+              <Typography className="text-sm text-[var(--sp-text-muted)]">
+                Enter your credentials to access the dashboard
+              </Typography>
             </CardHeader>
-            <CardContent className="p-6 space-y-5">
+            <CardContent className="space-y-5 p-6">
               <form onSubmit={handleLogin} className="space-y-5">
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-gray-300 text-xs font-bold uppercase tracking-wider">Email Address</Label>
-                  <Input 
-                    id="email" 
-                    type="email" 
-                    placeholder="admin@intracom.com" 
+                {error && (
+                  <Alert variant="destructive">
+                    <AlertTitle>Sign in failed</AlertTitle>
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
+
+                <FormField
+                  label="Email Address"
+                  className="[&_label]:text-xs [&_label]:font-bold [&_label]:uppercase [&_label]:tracking-wider [&_label]:text-[var(--sp-color-grey-300)]"
+                >
+                  <Input
+                    type="email"
+                    placeholder="admin@intracom.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:ring-blue-500 focus:border-blue-500 rounded-xl"
+                    autoComplete="email"
+                    className={inputClassName}
                   />
-                </div>
+                </FormField>
+
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="password" className="text-gray-300 text-xs font-bold uppercase tracking-wider">Password</Label>
-                    <a href="#" className="text-xs text-blue-400 hover:text-blue-300 font-bold transition-colors">Forgot?</a>
+                    <Label htmlFor="password" className={labelClassName}>
+                      Password
+                    </Label>
+                    <a href="#" className="text-xs font-bold text-[var(--sp-color-primary-400)] transition-colors hover:text-[var(--sp-color-primary-300)]">
+                      Forgot?
+                    </a>
                   </div>
-                  <Input 
-                    id="password" 
-                    type="password" 
+                  <PasswordInput
+                    id="password"
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:ring-blue-500 focus:border-blue-500 rounded-xl"
+                    autoComplete="current-password"
+                    className={inputClassName}
                   />
                 </div>
-                <Button type="submit" className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-600/20 transition-all active:scale-[0.98] mt-4" disabled={isLoading}>
+
+                <Button
+                  type="submit"
+                  variant="primary"
+                  className="mt-4 h-12 w-full rounded-xl font-bold shadow-lg shadow-[var(--sp-color-primary-500)]/20 transition-all active:scale-[0.98]"
+                  disabled={isLoading}
+                >
                   {isLoading ? (
-                    <div className="flex items-center gap-2">
-                       <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                       Authenticating...
-                    </div>
-                  ) : 'Sign In to Dashboard'}
+                    <span className="flex items-center gap-2">
+                      <Spinner size="sm" className="text-white" />
+                      Authenticating...
+                    </span>
+                  ) : (
+                    'Sign In to Dashboard'
+                  )}
                 </Button>
               </form>
             </CardContent>
-            <CardFooter className="p-6 pt-2 border-t border-white/5 flex flex-col gap-4">
-               <div className="grid grid-cols-3 gap-4">
-                  <Feature icon={<ShieldCheck size={16} />} label="Secure" />
-                  <Feature icon={<Globe size={16} />} label="Global" />
-                  <Feature icon={<Zap size={16} />} label="Real-time" />
-               </div>
+            <CardFooter className="flex flex-col gap-4 border-t border-white/5 p-6 pt-2">
+              <div className="grid grid-cols-3 gap-4">
+                <Feature icon={<ShieldCheck size={16} />} label="Secure" />
+                <Feature icon={<Globe size={16} />} label="Global" />
+                <Feature icon={<Zap size={16} />} label="Real-time" />
+              </div>
             </CardFooter>
           </Card>
-          
+
           <div className="text-center">
-             <Typography className="text-gray-500 text-sm">
-               Don't have an account? <span className="text-blue-400 font-bold cursor-pointer hover:underline">Contact Support</span>
-             </Typography>
+            <Typography className="text-sm text-[var(--sp-text-muted)]">
+              Don&apos;t have an account?{' '}
+              <span className="cursor-pointer font-bold text-[var(--sp-color-primary-400)] hover:underline">Contact Support</span>
+            </Typography>
           </div>
         </div>
       </div>
@@ -108,11 +167,11 @@ export default function LoginPage() {
   );
 }
 
-function Feature({ icon, label }: { icon: React.ReactNode, label: string }) {
-   return (
-      <div className="flex flex-col items-center gap-1.5 opacity-40 hover:opacity-100 transition-opacity cursor-default">
-         <div className="text-white">{icon}</div>
-         <span className="text-[10px] text-white font-bold uppercase tracking-widest">{label}</span>
-      </div>
-   )
+function Feature({ icon, label }: { icon: React.ReactNode; label: string }) {
+  return (
+    <div className="flex cursor-default flex-col items-center gap-1.5 opacity-40 transition-opacity hover:opacity-100">
+      <div className="text-white">{icon}</div>
+      <span className="text-[10px] font-bold uppercase tracking-widest text-white">{label}</span>
+    </div>
+  );
 }

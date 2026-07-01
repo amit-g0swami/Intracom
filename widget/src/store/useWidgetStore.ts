@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { SOCKET_EVENTS, type SocketMessagePayload } from '@intracom/contracts'
 import { initSocket, getSocket } from '../services/socket'
 
 export interface Message {
@@ -24,6 +25,16 @@ interface WidgetState {
   sendMessage: (text: string) => void
 }
 
+function socketPayloadToMessage(payload: SocketMessagePayload): Message {
+  return {
+    id: payload.id,
+    text: payload.text,
+    senderId: payload.senderId,
+    timestamp: new Date(payload.timestamp).getTime(),
+    isAdmin: payload.isAdmin,
+  }
+}
+
 export const useWidgetStore = create<WidgetState>((set, get) => ({
   isOpen: false,
   unreadCount: 0,
@@ -36,10 +47,8 @@ export const useWidgetStore = create<WidgetState>((set, get) => ({
   setUnreadCount: (count) => set({ unreadCount: count }),
 
   addMessage: (msg) => set((state) => {
-    // Prevent duplicate messages just in case
     if (state.messages.find(m => m.id === msg.id)) return state;
     
-    // Increment unread count if widget is closed and admin sent message
     const newUnreadCount = !state.isOpen && msg.isAdmin ? state.unreadCount + 1 : state.unreadCount;
     return { 
       messages: [...state.messages, msg],
@@ -53,7 +62,6 @@ export const useWidgetStore = create<WidgetState>((set, get) => ({
     const state = get();
     if (state.isConnected) return;
     
-    // Attempt to persist local identity per visitor
     let savedId = localStorage.getItem('intracom_conversation_id');
     if (!savedId) {
         savedId = crypto.randomUUID();
@@ -72,15 +80,8 @@ export const useWidgetStore = create<WidgetState>((set, get) => ({
       set({ isConnected: false });
     });
 
-    socket.on('new_message', (payload: any) => {
-      // payload matches backend SendMessageDto shape
-      get().addMessage({
-        id: crypto.randomUUID(), // Assume generation locally for display
-        text: payload.text,
-        senderId: payload.senderId,
-        timestamp: Date.now(),
-        isAdmin: payload.isAdmin,
-      });
+    socket.on(SOCKET_EVENTS.NEW_MESSAGE, (payload: SocketMessagePayload) => {
+      get().addMessage(socketPayloadToMessage(payload));
     });
   },
 
@@ -90,16 +91,13 @@ export const useWidgetStore = create<WidgetState>((set, get) => ({
     
     if (!socket || !conversationId) return;
 
-    const payload = {
+    socket.emit(SOCKET_EVENTS.SEND_MESSAGE, {
       conversationId,
       senderId: 'visitor',
       text,
       isAdmin: false
-    };
-
-    socket.emit('send_message', payload);
+    });
     
-    // Optimistic UI update
     get().addMessage({
       id: crypto.randomUUID(),
       text,
