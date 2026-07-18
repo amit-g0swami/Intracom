@@ -34,7 +34,7 @@ Step-by-step path from MVP to enterprise scale. **Completed items are checked.**
 
 ### Caching & jobs
 - [x] Redis Socket.IO adapter
-- [ ] BullMQ job queue (email notifications)
+- [x] BullMQ job queue (email notifications)
 
 ### DevOps
 - [x] `docker-compose.yml` (Postgres + Redis)

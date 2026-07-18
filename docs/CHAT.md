@@ -12,6 +12,7 @@ flowchart LR
   ChatService -->|FEATURE_CHAT_PERSISTENCE| DB[(PostgreSQL)]
   ChatService -->|message.sent| Handler
   Handler -->|admin_new_message / new_message| Socket
+  Handler -->|BullMQ job| EmailWorker
   Admin -->|GET /conversations| ChatAPI
   ChatAPI --> DB
 ```
@@ -57,6 +58,12 @@ npx prisma migrate dev
 ```
 
 ### 2. Server
+
+Ensure Redis is running (used for Socket.IO and BullMQ):
+
+```bash
+docker compose up -d redis
+```
 
 ```bash
 cd server

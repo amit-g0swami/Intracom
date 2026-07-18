@@ -31,7 +31,7 @@ flowchart TB
   subgraph backend
     S[NestJS server]
     DB[(PostgreSQL)]
-    R[(Redis optional)]
+    R[(Redis - PubSub & BullMQ)]
   end
 
   W -->|Socket.IO| S
@@ -42,6 +42,7 @@ flowchart TB
   S --> C
   S --> DB
   S --> R
+  S -.->|BullMQ jobs| R
 ```
 
 ## Request flows
@@ -70,6 +71,7 @@ sequenceDiagram
   participant Svc as ChatService
   participant DB as PostgreSQL
   participant Admin
+  participant Queue as BullMQ
 
   Widget->>GW: send_message (socket)
   GW->>Svc: processIncomingMessage
@@ -77,6 +79,7 @@ sequenceDiagram
   Svc->>Svc: emit message.sent
   GW->>Widget: new_message
   GW->>Admin: admin_new_message
+  Svc->>Queue: dispatch email notification (if visitor)
 ```
 
 ### 3. Admin opens inbox (persisted)
@@ -135,7 +138,7 @@ Do **not** put NestJS modules or Prisma in `@intracom/contracts`.
 When you split repos:
 
 1. Publish `@intracom/contracts` to private npm.
-2. Extract first worker (e.g. email notifications) consuming `DOMAIN_EVENTS.MESSAGE_SENT`.
+2. Extract the BullMQ email worker into a separate microservice listening to a remote Redis queue.
 3. Keep the API gateway as `server/` with sockets + REST.
 
 The monorepo `file:../contracts` link becomes `"@intracom/contracts": "^0.2.0"` per service.
