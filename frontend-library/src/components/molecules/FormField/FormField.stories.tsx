@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { FormField } from './FormField';
 import { Input } from '../../atoms/Input';
 import { Textarea } from '../../atoms/Textarea';
+import { DatePicker } from '../DatePicker';
+import { DateRangePicker } from '../DateRangePicker';
 
 const meta: Meta<typeof FormField> = {
     title: 'Molecules/FormField',
@@ -57,5 +59,41 @@ export const Required: Story = {
     args: {
         label: 'Password',
         required: true,
+    },
+};
+
+export const WithDatePicker: Story = {
+    render: (args) => (
+        <FormField {...args}>
+            <DatePicker placeholder="Pick a date" className="w-full" />
+        </FormField>
+    ),
+    args: {
+        label: 'Start date',
+        description: 'Select when the event begins.',
+    },
+};
+
+export const WithDateRangePicker: Story = {
+    render: (args) => (
+        <FormField {...args}>
+            <DateRangePicker numberOfMonths={1} className="w-full" />
+        </FormField>
+    ),
+    args: {
+        label: 'Reporting period',
+        description: 'Choose the start and end dates.',
+    },
+};
+
+export const WithDatePickerError: Story = {
+    render: (args) => (
+        <FormField {...args}>
+            <DatePicker placeholder="Pick a due date" className="w-full" />
+        </FormField>
+    ),
+    args: {
+        label: 'Due date',
+        error: 'Please select a valid due date.',
     },
 };

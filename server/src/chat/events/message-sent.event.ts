@@ -5,5 +5,6 @@ export class MessageSentEvent {
     public readonly text: string,
     public readonly senderId: string,
     public readonly isAdmin: boolean,
+    public readonly createdAt: Date,
   ) {}
 }

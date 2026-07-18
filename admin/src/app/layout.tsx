@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { SocketProvider } from '@/components/SocketProvider';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { ChatProvider } from '@/providers/ChatProvider';
 
 export const metadata: Metadata = {
   title: 'Intracom Admin Dashboard',
@@ -17,9 +17,9 @@ export default function RootLayout({
     <html lang="en">
       <body className="antialiased bg-gray-50 text-gray-900">
         <AuthProvider>
-          <SocketProvider>
+          <ChatProvider>
             {children}
-          </SocketProvider>
+          </ChatProvider>
         </AuthProvider>
       </body>
     </html>

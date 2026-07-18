@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Logger, UnauthorizedException } from '@nestjs/common';
 import {
   WebSocketGateway,
   WebSocketServer,
@@ -9,6 +9,10 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import type { SocketMessagePayload } from '@intracom/contracts';
+import { SOCKET_EVENTS } from '@intracom/contracts';
+import { AuthService } from '../../auth/auth.service';
+import { loadFeatureFlags } from '../../config/features';
 import { ChatService } from '../services/chat.service';
 import { SendMessageDto } from '../dto/send-message.dto';
 
@@ -20,45 +24,82 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   server: Server;
 
   private readonly logger = new Logger(ChatGateway.name);
+  private readonly features = loadFeatureFlags();
 
-  constructor(private readonly chatService: ChatService) {}
+  constructor(
+    private readonly chatService: ChatService,
+    private readonly authService: AuthService,
+  ) {}
 
   handleConnection(client: Socket) {
     this.logger.log(`Client connected: ${client.id}`);
-    
-    // In a real app, authorize JWT Token here and join them to their specific conversation room
+
     const conversationId = client.handshake.query['conversationId'] as string;
+
     if (conversationId) {
       client.join(`conversation_${conversationId}`);
       this.logger.log(`Socket ${client.id} joined conversation_${conversationId}`);
-    } else {
-      // Connect admins to an overarching 'admins' broadcast room
-      const isAdmin = client.handshake.query['isAdmin'];
-      if(isAdmin === 'true') {
-        client.join('admin_dashboard');
-      }
+      return;
     }
+
+    const isAdmin = client.handshake.query['isAdmin'] === 'true';
+
+    if (!isAdmin) {
+      return;
+    }
+
+    if (this.features.socketAuthEnabled) {
+      const token =
+        (client.handshake.auth?.token as string | undefined) ||
+        (client.handshake.query['token'] as string | undefined);
+
+      if (!token) {
+        this.logger.warn(`Admin socket ${client.id} rejected — missing token`);
+        client.disconnect(true);
+        return;
+      }
+
+      try {
+        const user = this.authService.verifyToken(token);
+        client.data.user = user;
+        client.join('admin_dashboard');
+        this.logger.log(`Authenticated admin ${user.email} joined dashboard`);
+      } catch {
+        this.logger.warn(`Admin socket ${client.id} rejected — invalid token`);
+        client.disconnect(true);
+        return;
+      }
+
+      return;
+    }
+
+    client.join('admin_dashboard');
   }
 
   handleDisconnect(client: Socket) {
     this.logger.log(`Client disconnected: ${client.id}`);
   }
 
-  // Thin Gateway Logic - delegates instantly to the generic Service layer
-  @SubscribeMessage('send_message')
+  @SubscribeMessage(SOCKET_EVENTS.SEND_MESSAGE)
   async handleIncomingMessage(
     @ConnectedSocket() client: Socket,
     @MessageBody() payload: SendMessageDto,
   ) {
-    // Calling application layer. No DB code lives in the gateway.
+    if (this.features.socketAuthEnabled && payload.isAdmin) {
+      if (!client.data.user) {
+        throw new UnauthorizedException('Admin socket is not authenticated');
+      }
+    }
+
     await this.chatService.processIncomingMessage(payload);
   }
 
-  // Method called globally by Event Handlers when a message needs to be pushed
-  broadcastMessage(conversationId: string, payload: any) {
-    // Broadcast back to the single conversation room (Visitor)
-    this.server.to(`conversation_${conversationId}`).emit('new_message', payload);
-    // Broadcast to the Dashboard Admins
-    this.server.to('admin_dashboard').emit('admin_new_message', payload);
+  broadcastMessage(conversationId: string, payload: SocketMessagePayload) {
+    this.server
+      .to(`conversation_${conversationId}`)
+      .emit(SOCKET_EVENTS.NEW_MESSAGE, payload);
+    this.server
+      .to('admin_dashboard')
+      .emit(SOCKET_EVENTS.ADMIN_NEW_MESSAGE, payload);
   }
 }

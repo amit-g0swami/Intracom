@@ -7,21 +7,53 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model AdminUser {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("admin")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Visitor {
+  id            String         @id @default(uuid())
+  appId         String
+  email         String?
+  name          String?
+  attributes    Json           @default("{}")
+  lastSeenAt    DateTime       @default(now())
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  conversations Conversation[]
+
+  @@index([appId])
+  @@index([lastSeenAt(sort: Desc)])
+  @@index([email])
+}
+
 model Conversation {
   id        String    @id @default(uuid())
-  appId     String    // Links to the business tenant account
-  status    String    @default("open") // 'open', 'resolved'
+  appId     String
+  status    String    @default("open")
+  visitorId String?
+  visitor   Visitor?  @relation(fields: [visitorId], references: [id], onDelete: SetNull)
   createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   messages  Message[]
+
+  @@index([updatedAt(sort: Desc)])
+  @@index([status])
+  @@index([visitorId])
 }
 
 model Message {
   id             String       @id @default(uuid())
   text           String
-  senderId       String       // Session token ID or Dashboard Admin ID
+  senderId       String
   isAdmin        Boolean      @default(false)
   createdAt      DateTime     @default(now())
-  
   conversationId String
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 }

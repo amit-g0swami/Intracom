@@ -1,50 +1,76 @@
 "use client";
 
-import { useSocket } from '@/components/SocketProvider';
-import { useParams } from 'next/navigation';
-import { ThreadMap, MessagePayload } from '@/types/chat.types';
-import { InboxList } from '@/components/chat/InboxList';
+import { useCallback, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import { ChatWindow } from '@/components/chat/ChatWindow';
+import { InboxList } from '@/components/chat/InboxList';
+import { updateConversationStatus } from '@/lib/chat-api';
+import { useChat } from '@/providers/ChatProvider';
 
 export default function ChatDetailPage() {
   const { id } = useParams();
+  const router = useRouter();
   const activeThreadId = (Array.isArray(id) ? id[0] : id) || null;
-  
-  const { socket, isConnected, messages } = useSocket();
-  
-  const threads: ThreadMap = messages.reduce((acc: ThreadMap, msg: MessagePayload) => {
-    if (!acc[msg.conversationId]) acc[msg.conversationId] = [];
-    acc[msg.conversationId].push(msg);
-    return acc;
-  }, {});
 
-  const activeConversationIds = Object.keys(threads);
+  const {
+    isConnected,
+    threads,
+    activeConversationIds,
+    conversations,
+    isLoadingInbox,
+    isLoadingMessages,
+    loadConversationMessages,
+    refreshInbox,
+    sendReply,
+  } = useChat();
+
+  useEffect(() => {
+    if (!activeThreadId) {
+      return;
+    }
+
+    void loadConversationMessages(activeThreadId);
+  }, [activeThreadId, loadConversationMessages]);
+
   const activeMessages = activeThreadId ? threads[activeThreadId] || [] : [];
+  const conversationStatus =
+    conversations.find((conversation) => conversation.id === activeThreadId)?.status ?? 'open';
 
   const handleReply = (text: string) => {
-    if (!socket || !activeThreadId) return;
+    if (!activeThreadId) {
+      return;
+    }
 
-    socket.emit('send_message', {
-      conversationId: activeThreadId,
-      senderId: 'admin',
-      text,
-      isAdmin: true
-    });
+    sendReply(activeThreadId, text);
   };
+
+  const handleResolve = useCallback(async () => {
+    if (!activeThreadId) {
+      return;
+    }
+
+    await updateConversationStatus(activeThreadId, 'resolved');
+    await refreshInbox();
+    router.push('/chat');
+  }, [activeThreadId, refreshInbox, router]);
 
   return (
     <>
-      <InboxList 
+      <InboxList
         isConnected={isConnected}
         threads={threads}
         activeConversationIds={activeConversationIds}
         activeThreadId={activeThreadId}
+        isLoading={isLoadingInbox}
       />
-      <ChatWindow 
+      <ChatWindow
         activeThreadId={activeThreadId}
         activeMessages={activeMessages}
         isConnected={isConnected}
+        isLoadingMessages={isLoadingMessages}
+        conversationStatus={conversationStatus}
         handleReply={handleReply}
+        onResolve={handleResolve}
       />
     </>
   );

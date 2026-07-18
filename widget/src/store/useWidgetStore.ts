@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { SOCKET_EVENTS, type SocketMessagePayload } from '@intracom/contracts'
 import { initSocket, getSocket } from '../services/socket'
 
 export interface Message {
@@ -15,7 +16,8 @@ interface WidgetState {
   messages: Message[]
   isConnected: boolean
   conversationId: string | null
-  
+  visitorId: string | null
+
   toggleWidget: () => void
   setUnreadCount: (count: number) => void
   addMessage: (msg: Message) => void
@@ -24,24 +26,42 @@ interface WidgetState {
   sendMessage: (text: string) => void
 }
 
+function socketPayloadToMessage(payload: SocketMessagePayload): Message {
+  return {
+    id: payload.id,
+    text: payload.text,
+    senderId: payload.senderId,
+    timestamp: new Date(payload.timestamp).getTime(),
+    isAdmin: payload.isAdmin,
+  }
+}
+
+function getOrCreateStorageKey(key: string): string {
+  let value = localStorage.getItem(key)
+  if (!value) {
+    value = crypto.randomUUID()
+    localStorage.setItem(key, value)
+  }
+  return value
+}
+
 export const useWidgetStore = create<WidgetState>((set, get) => ({
   isOpen: false,
   unreadCount: 0,
   messages: [],
   isConnected: false,
   conversationId: null,
+  visitorId: null,
 
   toggleWidget: () => set((state) => ({ isOpen: !state.isOpen })),
 
   setUnreadCount: (count) => set({ unreadCount: count }),
 
   addMessage: (msg) => set((state) => {
-    // Prevent duplicate messages just in case
     if (state.messages.find(m => m.id === msg.id)) return state;
-    
-    // Increment unread count if widget is closed and admin sent message
+
     const newUnreadCount = !state.isOpen && msg.isAdmin ? state.unreadCount + 1 : state.unreadCount;
-    return { 
+    return {
       messages: [...state.messages, msg],
       unreadCount: newUnreadCount
     };
@@ -52,17 +72,13 @@ export const useWidgetStore = create<WidgetState>((set, get) => ({
   initChat: (url = 'http://localhost:3000') => {
     const state = get();
     if (state.isConnected) return;
-    
-    // Attempt to persist local identity per visitor
-    let savedId = localStorage.getItem('intracom_conversation_id');
-    if (!savedId) {
-        savedId = crypto.randomUUID();
-        localStorage.setItem('intracom_conversation_id', savedId);
-    }
-    
-    set({ conversationId: savedId });
 
-    const socket = initSocket(url, savedId);
+    const visitorId = getOrCreateStorageKey('intracom_visitor_id');
+    const conversationId = getOrCreateStorageKey('intracom_conversation_id');
+
+    set({ conversationId, visitorId });
+
+    const socket = initSocket(url, conversationId);
 
     socket.on('connect', () => {
       set({ isConnected: true });
@@ -72,34 +88,30 @@ export const useWidgetStore = create<WidgetState>((set, get) => ({
       set({ isConnected: false });
     });
 
-    socket.on('new_message', (payload: any) => {
-      // payload matches backend SendMessageDto shape
-      get().addMessage({
-        id: crypto.randomUUID(), // Assume generation locally for display
-        text: payload.text,
-        senderId: payload.senderId,
-        timestamp: Date.now(),
-        isAdmin: payload.isAdmin,
-      });
+    socket.on(SOCKET_EVENTS.NEW_MESSAGE, (payload: SocketMessagePayload) => {
+      get().addMessage(socketPayloadToMessage(payload));
     });
   },
 
   sendMessage: (text: string) => {
-    const { conversationId } = get();
+    const { conversationId, visitorId } = get();
     const socket = getSocket();
-    
-    if (!socket || !conversationId) return;
 
-    const payload = {
+    if (!socket || !conversationId || !visitorId) return;
+
+    socket.emit(SOCKET_EVENTS.SEND_MESSAGE, {
       conversationId,
+      visitorId,
       senderId: 'visitor',
       text,
-      isAdmin: false
-    };
+      isAdmin: false,
+      visitorAttributes: {
+        userAgent: navigator.userAgent,
+        language: navigator.language,
+        pageUrl: window.location.href,
+      },
+    });
 
-    socket.emit('send_message', payload);
-    
-    // Optimistic UI update
     get().addMessage({
       id: crypto.randomUUID(),
       text,

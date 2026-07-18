@@ -1,24 +1,44 @@
-# Intracom (Intercom Clone)
+# Intracom
 
-Intracom is an enterprise-grade, embeddable customer communication platform built with a highly decoupled microservices architecture. It allows businesses to inject a secure, completely visually isolated chat widget onto any website.
+Embeddable customer chat platform — widget, admin dashboard, and NestJS backend.
 
-## 🚀 Live Widget Usage
+**New developers:** start at [docs/README.md](./docs/README.md).
 
-Once a client signs up for an Intracom account, they simply need to copy and paste the snippet below into the `<head>` or `<body>` of their website.
+## Repository structure
+
+| Directory | Role |
+|-----------|------|
+| `contracts/` | `@intracom/contracts` — shared types |
+| `frontend-library/` | `intracom-ui` — React components |
+| `server/` | NestJS API + WebSockets + Prisma |
+| `admin/` | Next.js admin dashboard |
+| `widget/` | Preact embeddable widget |
+| `docs/` | Architecture, setup, feature guides |
+
+## Quick start
+
+```bash
+docker compose up -d          # optional Postgres + Redis
+npm install                   # from repo root
+cd server && cp .env.example .env && npx prisma migrate dev && npm run start:dev
+cd admin && cp .env.example .env.local && npm run dev
+```
+
+Admin: [http://localhost:3001](http://localhost:3001) · API: [http://localhost:3000/api](http://localhost:3000/api)
+
+## Widget embed
 
 ```html
-<!-- 👇 THIS IS YOUR ACTUAL LIVE SCRIPT 👇 -->
 <script src="https://intracom.goswamiempire.workers.dev/widget.js" data-app-id="my-first-test-app" defer></script>
 ```
 
-### Why This Architecture Works
-The widget is built using **Preact**, **Zustand**, and **Vanilla CSS** wrapped tightly inside a **Web Components Shadow DOM**. 
-- **Shadow DOM Shielding**: It natively ignores the host website's CSS. The widget will look perfect whether it is installed on a site with massive `margin: 0 !important` rules or toxic font resets.
-- **Micro-Bundle Size**: Because we compile Preact to an IIFE (Immediately Invoked Function Expression) with Vite via Library Mode, the total gzipped footprint is only `~11kb`, guaranteeing your clients' Google PageSpeed SEO scores remain untouched.
+## Documentation
 
-## 📁 Repository Structure
-
-*   **/widget**: The embeddable Preact SDK and chat bubble interface.
-*   **/frontend-library**: Custom UI components for the internal admin dashboard.
-*   *(Coming Soon) /backend*: NestJS Core mapping websockets to postgres.
-*   *(Coming Soon) /dashboard*: The Next.js admin dashboard to reply to users.
+- [Architecture & flows](./docs/ARCHITECTURE.md)
+- [Local development](./docs/DEVELOPMENT.md)
+- [Shared packages](./docs/PACKAGES.md)
+- [Authentication](./docs/AUTHENTICATION.md)
+- [Chat & inbox](./docs/CHAT.md)
+- [Analytics](./docs/ANALYTICS.md)
+- [Visitors / user profiles](./docs/VISITORS.md)
+- [Roadmap](./PROJECT_ROADMAP.md)
