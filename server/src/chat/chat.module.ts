@@ -18,5 +18,6 @@ import { ChatService } from './services/chat.service';
     MessageRepository,
     MessageSentHandler,
   ],
+  exports: [ChatService, MessageRepository],
 })
 export class ChatModule {}

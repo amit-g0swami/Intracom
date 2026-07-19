@@ -9,6 +9,7 @@ import { StatsModule } from './stats/stats.module';
 import { VisitorsModule } from './visitors/visitors.module';
 import { BullModule } from '@nestjs/bullmq';
 import { EmailModule } from './email/email.module';
+import { AiModule } from './ai/ai.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { EmailModule } from './email/email.module';
     StatsModule,
     VisitorsModule,
     EmailModule,
+    AiModule,
   ],
   controllers: [AppController],
   providers: [AppService],
